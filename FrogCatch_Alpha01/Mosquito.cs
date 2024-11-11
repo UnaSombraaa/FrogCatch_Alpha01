@@ -8,28 +8,35 @@ namespace FrogCatch_Alpha01
     {
         private Texture2D[] estadosMosquito;
         private Vector2[] posiciones;
-        private bool[] atrapados; // Para saber si un mosquito ha sido atrapado
+        private bool[] atrapados; // Para saber si un mosquito fue atrapado
         private int frameActual;
         private double tiempoTranscurrido;
         private double tiempoPorFrame = 100;
         private float velocidad = 2f;
         private int cantidadMosquitos = 5; // Cantidad total de mosquitos
-        private Random random = new Random(); // Mueve la instancia de Random aquí
-        private int limiteY; // Límite en el eje Y para la aparición de mosquitos
+        private Random random = new Random();
+        private int limiteY;
 
-        // Añadimos un parámetro para establecer el límite en Y
-        public Mosquito(Texture2D BichoAlto, Texture2D MosquitoMedio, Texture2D Bicho1Bajo, int ancho, int alto, int limiteY)
+        // Nuevas propiedades para efectos de color y tiempo
+        private Color[] coloresMosquito; 
+        public bool[] agregarTiempo;  
+        public bool[] quitarTiempo;  
+
+        public Mosquito(Texture2D MosquitoArriba, Texture2D MosquitoMedio, Texture2D MosquitoBajo, int ancho, int alto, int limiteY)
         {
-            estadosMosquito = new Texture2D[] { BichoAlto, MosquitoMedio, Bicho1Bajo };
+            estadosMosquito = new Texture2D[] { MosquitoArriba, MosquitoMedio, MosquitoBajo };
             posiciones = new Vector2[cantidadMosquitos];
-            atrapados = new bool[cantidadMosquitos]; // Inicializa el array de atrapados
+            atrapados = new bool[cantidadMosquitos]; 
+            coloresMosquito = new Color[cantidadMosquitos]; 
+            agregarTiempo = new bool[cantidadMosquitos];
+            quitarTiempo = new bool[cantidadMosquitos];  
             this.limiteY = limiteY; // Guardamos el límite en Y
             SpawnMosquitos(ancho, alto);
             frameActual = 0;
             tiempoTranscurrido = 0;
         }
 
-        public Vector2[] Posiciones => posiciones; // Agrega esta línea
+        public Vector2[] Posiciones => posiciones; 
 
         // Método para verificar si un mosquito está atrapado
         public bool IsMosquitoAtrapado(int index)
@@ -42,11 +49,40 @@ namespace FrogCatch_Alpha01
             for (int i = 0; i < cantidadMosquitos; i++)
             {
                 posiciones[i] = new Vector2(0, random.Next(0, limiteY)); // Aparecen en la parte izquierda
-                atrapados[i] = false; // Inicializa todos los mosquitos como no atrapados
+                atrapados[i] = false; 
+                MosquitosEspeciales(i);  // Asigna un color y efecto a cada mosquito
             }
         }
 
-        public void Update(GameTime gameTime, Rectangle lenguaRect)
+        // Método para asignar color y efectos (agregar o quitar tiempo)
+        private void MosquitosEspeciales(int index)
+        {
+            double probabilidadVerde = 0.20; // 20% de probabilidad
+            double probabilidadRojo = 0.30;  // 30% de probabilidad
+
+            double randVal = random.NextDouble();
+
+            if (randVal < probabilidadVerde)
+            {
+                coloresMosquito[index] = Color.Green;  // Cambia el color a verde
+                agregarTiempo[index] = true; // Este mosquito agrega tiempo
+                quitarTiempo[index] = false;
+            }
+            else if (randVal < probabilidadVerde + probabilidadRojo)
+            {
+                coloresMosquito[index] = Color.Red;    // Cambia el color a rojo
+                agregarTiempo[index] = false;
+                quitarTiempo[index] = true; // Este mosquito quita tiempo
+            }
+            else
+            {
+                coloresMosquito[index] = Color.White;  // Color normal
+                agregarTiempo[index] = false;
+                quitarTiempo[index] = false; // No tiene efectos especiales
+            }
+        }
+
+        public void Update(GameTime gameTime, Rectangle lenguaRect, ref double tiempoJuego, ref int score)
         {
             tiempoTranscurrido += gameTime.ElapsedGameTime.TotalMilliseconds;
             if (tiempoTranscurrido >= tiempoPorFrame)
@@ -73,19 +109,34 @@ namespace FrogCatch_Alpha01
                     if (mosquitoRect.Intersects(lenguaRect))
                     {
                         atrapados[i] = true; // Marca el mosquito como atrapado
-                                             // Genera un nuevo mosquito en una posición aleatoria
-                        GenerateNewMosquito(i, 800, 600);
-                        return; // Sale del ciclo una vez que captura un mosquito
+
+                        // Verifica si el mosquito agrega o quita tiempo
+                        if (agregarTiempo[i])
+                        {
+                            tiempoJuego += 2; // Aumenta 2 segundos al tiempo del juego
+                        }
+                        else if (quitarTiempo[i])
+                        {
+                            tiempoJuego -= 5; // Disminuye 5 segundos al tiempo del juego
+                        }
+
+                        // Aumenta el score cuando el mosquito es atrapado
+                        score += 10;
                     }
                 }
             }
         }
 
-        // Cambiar el modificador de acceso a public
+        public void SetMosquitoAtrapado(int index)
+        {
+            atrapados[index] = true;
+        }
+
         public void GenerateNewMosquito(int index, int ancho, int alto)
         {
             posiciones[index] = new Vector2(0, random.Next(0, limiteY)); // Aparecen en la parte izquierda
             atrapados[index] = false; // Reinicia el estado del mosquito
+            MosquitosEspeciales(index);  // Reasigna el color y efectos al nuevo mosquito
         }
 
         public void Draw(SpriteBatch spriteBatch)
@@ -94,7 +145,7 @@ namespace FrogCatch_Alpha01
             {
                 if (!atrapados[i]) // Solo dibuja los mosquitos que no han sido atrapados
                 {
-                    spriteBatch.Draw(estadosMosquito[frameActual], new Rectangle((int)posiciones[i].X, (int)posiciones[i].Y, 50, 50), Color.White);
+                    spriteBatch.Draw(estadosMosquito[frameActual], new Rectangle((int)posiciones[i].X, (int)posiciones[i].Y, 50, 50), coloresMosquito[i]);
                 }
             }
         }

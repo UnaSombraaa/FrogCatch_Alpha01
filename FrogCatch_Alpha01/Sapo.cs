@@ -1,45 +1,49 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using System.Threading;
 
 namespace FrogCatch_Alpha01
 {
     public class Sapo
     {
-        private Texture2D[] estadosSapo; // sapoBase, sapoMedio, sapoDisparo, sapoDisparando
-        private Texture2D[] lenguas; // lenguas para diferentes estados
+   
+
+        
+        private Texture2D[] estadosSapo;
+        private Texture2D[] lenguas;
+
         private int frameActualSapo;
         private float alturaLengua;
-        private float velocidadSubida = 2500f;
-        private float velocidadBajada = 1000f;
+        
+        private float velocidadSubida = 1500f;
+        private float velocidadBajada = 750f;
+        
         private bool disparando;
         private bool cargando;
         private bool subiendo;
+        
         private float tiempoPresionado;
         private Vector2 posicionLengua;
-        private float alturaMaxima; // Asegúrate de que esta variable esté definida
-
-        // Variable para la posición de colisión
+        private float alturaMaxima;
         private Vector2 posicionColision;
 
-        public Sapo(Texture2D sapoBase, Texture2D sapoMedio, Texture2D sapoDisparo, Texture2D sapoDisparando, Texture2D[] lenguas)
+        public Sapo(Texture2D sapoBase, Texture2D sapoDisparoBajo, Texture2D sapoDisparoMedio, Texture2D sapoDisparoAlto, Texture2D[] lenguas)
         {
-            estadosSapo = new Texture2D[] { sapoBase, sapoMedio, sapoDisparo, sapoDisparando };
+            estadosSapo = new Texture2D[] { sapoBase, sapoDisparoBajo, sapoDisparoMedio, sapoDisparoAlto};
             this.lenguas = lenguas;
             alturaLengua = 0;
             disparando = false;
             cargando = false;
             subiendo = false;
             tiempoPresionado = 0;
-            posicionLengua = new Vector2(275, 380);
-            posicionColision = new Vector2(350, 380); // Inicializa la posición de colisión
-            alturaMaxima = 0; // Inicializa altura máxima
+            posicionLengua = new Vector2(280, 380);
+            posicionColision = new Vector2(360, 430);
+            alturaMaxima = 0;
         }
 
         public void Update(GameTime gameTime, KeyboardState keyboardState)
         {
-            
-
             if (keyboardState.IsKeyDown(Keys.Up))
             {
                 cargando = true;
@@ -49,12 +53,12 @@ namespace FrogCatch_Alpha01
             {
                 if (cargando && tiempoPresionado > 0)
                 {
-                    if (tiempoPresionado >= 750)
+                    if (tiempoPresionado >= 1000)
                         alturaMaxima = 450;
                     else if (tiempoPresionado >= 500)
-                        alturaMaxima = 350;
+                        alturaMaxima = 400;
                     else if (tiempoPresionado >= 200)
-                        alturaMaxima = 250;
+                        alturaMaxima = 200;
                     else
                         alturaMaxima = 0;
 
@@ -102,27 +106,45 @@ namespace FrogCatch_Alpha01
             }
         }
 
-        public Rectangle GetAreaColisionLengua()
+        public Rectangle AreaColisionLengua()
         {
-            int lenguaWidth = 100;
+            int lenguaWidth = 30;
             int lenguaHeight = (int)(alturaLengua * 0.8f);
             return new Rectangle((int)posicionColision.X, (int)(posicionColision.Y - lenguaHeight), lenguaWidth, lenguaHeight);
         }
 
-        public void Draw(SpriteBatch spriteBatch)
+        // Método para verificar si un mosquito fue atrapado
+        public bool ColisionMosquito(Mosquito mosquito)
         {
-            int lenguaFrame = alturaLengua >= 400 ? 0 : alturaLengua >= 300 ? 1 : alturaLengua >= 150 ? 2 : 3;
-            int lenguaWidth = 250;
-            int lenguaHeight = (int)(alturaLengua * 0.8f);
+            for (int i = 0; i < mosquito.Posiciones.Length; i++)
+            {
+                if (mosquito.IsMosquitoAtrapado(i)) continue; // Ignora si ya está atrapado
 
+                Rectangle mosquitoRect = new Rectangle((int)mosquito.Posiciones[i].X, (int)mosquito.Posiciones[i].Y, 50, 50);
+                if (mosquitoRect.Intersects(AreaColisionLengua()))
+                {
+                    mosquito.SetMosquitoAtrapado(i); // Actualiza el estado del mosquito
+                    return true; // Retorna que se atrapó un mosquito
+                }
+            }
+            return false;
+        }
+
+        public void Draw(SpriteBatch spriteBatch, int screenWidth, int screenHeight)
+        {
+            int lenguaFrame = alturaLengua >= 450 ? 0 : alturaLengua >= 300 ? 1 : alturaLengua >= 150 ? 2 : 3;
+            int lenguaWidth = 200;
+            int lenguaHeight = (int)(alturaLengua * 1f);
+            
+            
             spriteBatch.Draw(lenguas[lenguaFrame], new Rectangle((int)posicionLengua.X, (int)(posicionLengua.Y - lenguaHeight), lenguaWidth, lenguaHeight), Color.White);
-            spriteBatch.Draw(estadosSapo[frameActualSapo], new Rectangle(250, 200, 300, 300), Color.White);
+            spriteBatch.Draw(estadosSapo[frameActualSapo], new Rectangle(250, 230, 250, 250), Color.White);
 
-            // Dibuja el rectángulo de colisión de la lengua en un color semi-transparente
-            Rectangle areaColision = GetAreaColisionLengua();
+
+            Rectangle areaColision = AreaColisionLengua();
             Texture2D blanco = new Texture2D(spriteBatch.GraphicsDevice, 1, 1);
-            blanco.SetData(new[] { Color.White });
-            spriteBatch.Draw(blanco, areaColision, new Color(255, 0, 0, 100)); // Color rojo con transparencia
+            blanco.SetData(new[] { Color.Red });
+            spriteBatch.Draw(blanco, areaColision, Color.Blue);
         }
     }
 }
