@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
+using System.IO;
 
 namespace FrogCatch_Alpha01
 {
@@ -10,17 +11,31 @@ namespace FrogCatch_Alpha01
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
 
+        private Texture2D Marco;
+
         private Mosquito mosquito;
         private Sapo sapo;
-        private Texture2D fondoAnimado;
+        private Texture2D fondoD;
+        private Texture2D fondoN;
         private SpriteFont fuente;
 
         private int totalFramesFondo = 4;
         private int frameActualFondo = 0;
         private double tiempoTranscurridoFondo = 0;
         private double tiempoPorFrameFondo = 100;
+        private float alphaTransicion = 0.1f;
+        private bool esDeDia = true;
+        private double temporizadorFondo = 0;
+        private double tiempoCambioFondo = 10;
 
-        private int score = 0; // Agrega un campo para el score
+        private int score = 0;
+        private int mosquitosCapturados = 0; //contador de mosquitos
+        private double gameTimer = 60;
+
+        private bool isGameOver = false;
+        private bool isGameStarted = false;
+        private bool pantallaCompleta = false;
+        private bool teclaF11Presionada = false;
 
         public Game1()
         {
@@ -32,34 +47,60 @@ namespace FrogCatch_Alpha01
         protected override void LoadContent()
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
-            fuente = Content.Load<SpriteFont>("PixelFont"); // Asegúrate de que la fuente esté cargada
-            fondoAnimado = Content.Load<Texture2D>("FONDOREAL");
+            fuente = Content.Load<SpriteFont>("Fuente/Fuente");
+            fondoD = Content.Load<Texture2D>("Fondos/FondoD");
+            fondoN = Content.Load<Texture2D>("Fondos/FondoN");
 
-            Texture2D bichoAlto = Content.Load<Texture2D>("bichos1Alto");
-            Texture2D mosquitoMedio = Content.Load<Texture2D>("MosquitoMedio");
-            Texture2D bichoBajo = Content.Load<Texture2D>("bichos1Bajo");
+            Marco = Content.Load<Texture2D>("Sprites/Marco");
 
-            mosquito = new Mosquito(bichoAlto, mosquitoMedio, bichoBajo, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight, 600);
+            Texture2D mosquitoArriba = Content.Load<Texture2D>("Sprites/SpriteM1");
+            Texture2D mosquitoMedio = Content.Load<Texture2D>("Sprites/SpriteM2");
+            Texture2D mosquitoBajo = Content.Load<Texture2D>("Sprites/SpriteM3");
 
-            Texture2D sapoBase = Content.Load<Texture2D>("RANA MODIF");
-            Texture2D sapoMedio = Content.Load<Texture2D>("RANA MODIF2");
-            Texture2D sapoDisparo = Content.Load<Texture2D>("RANA MODIFDisparo");
-            Texture2D sapoDisparando = Content.Load<Texture2D>("RANA MODIFAA");
+            mosquito = new Mosquito(mosquitoArriba, mosquitoMedio, mosquitoBajo, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight, 300);
+
+            Texture2D sapoBase = Content.Load<Texture2D>("Sprites/SpriteS1");
+            Texture2D sapoDisparoBajo = Content.Load<Texture2D>("Sprites/SpriteS2");
+            Texture2D sapoDisparoMedio = Content.Load<Texture2D>("Sprites/SpriteS4");
+            Texture2D sapoDisparoAlto = Content.Load<Texture2D>("Sprites/SpriteS3");
 
             Texture2D[] lenguas = new Texture2D[4];
-            lenguas[0] = Content.Load<Texture2D>("Lengua sapo");
-            lenguas[1] = Content.Load<Texture2D>("Lengua sapo2");
-            lenguas[2] = Content.Load<Texture2D>("Lengua sapo3");
-            lenguas[3] = Content.Load<Texture2D>("Lengua sapo4");
+            lenguas[0] = Content.Load<Texture2D>("Sprites/Lengua sapo");
+            lenguas[1] = Content.Load<Texture2D>("Sprites/Lengua sapo2");
+            lenguas[2] = Content.Load<Texture2D>("Sprites/Lengua sapo3");
+            lenguas[3] = Content.Load<Texture2D>("Sprites/Lengua sapo4");
 
-            sapo = new Sapo(sapoBase, sapoMedio, sapoDisparo, sapoDisparando, lenguas);
-
-
+            sapo = new Sapo(sapoBase, sapoDisparoBajo, sapoDisparoMedio, sapoDisparoAlto, lenguas);
         }
 
         protected override void Update(GameTime gameTime)
         {
-            mosquito.Update(gameTime, sapo.GetAreaColisionLengua());
+            if (!isGameStarted)
+            {
+                if (Keyboard.GetState().IsKeyDown(Keys.Enter))
+                {
+                    isGameStarted = true;
+                }
+                return;
+            }
+
+            if (isGameOver)
+            {
+                if (Keyboard.GetState().IsKeyDown(Keys.Enter))
+                {
+                    ResetGame();
+                }
+                return;
+            }
+
+            gameTimer -= gameTime.ElapsedGameTime.TotalSeconds;
+            if (gameTimer <= 0)
+            {
+                isGameOver = true;
+                SaveScore();
+            }
+
+              mosquito.Update(gameTime, sapo.AreaColisionLengua(), ref gameTimer, ref score);
 
             KeyboardState keyboardState = Keyboard.GetState();
             sapo.Update(gameTime, keyboardState);
@@ -69,38 +110,108 @@ namespace FrogCatch_Alpha01
             {
                 frameActualFondo = (frameActualFondo + 1) % totalFramesFondo;
                 tiempoTranscurridoFondo = 0;
+
+                alphaTransicion -= 0.01f;
+                if (alphaTransicion <= 0)
+                {
+                    alphaTransicion = 1f;
+                    esDeDia = !esDeDia;
+                }
             }
 
-            // Incrementa el score si se atrapa un mosquito
+            if (keyboardState.IsKeyDown(Keys.F11) && !teclaF11Presionada)
+            {
+                pantallaCompleta = !pantallaCompleta;
+                _graphics.IsFullScreen = pantallaCompleta;
+                _graphics.ApplyChanges();
+                teclaF11Presionada = true;
+            }
+
+            if (keyboardState.IsKeyUp(Keys.F11))
+            {
+                teclaF11Presionada = false;
+            }
+
             for (int i = 0; i < mosquito.Posiciones.Length; i++)
             {
                 if (mosquito.IsMosquitoAtrapado(i))
                 {
-                    score++; // Incrementa el score
-                    Console.WriteLine($"Score: {score}"); // Imprime el score para verificar
+                    mosquito.SetMosquitoAtrapado(i);
+                    score += 10;
+                    mosquitosCapturados++; // Incrementa el contador de mosquitos atrapados
                     mosquito.GenerateNewMosquito(i, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight);
                 }
             }
-
-            if (keyboardState.IsKeyDown(Keys.Escape))
-                Exit();
-
-            base.Update(gameTime);
         }
 
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
             _spriteBatch.Begin();
+            
+            if (esDeDia)
+            {
+                _spriteBatch.Draw(fondoD, new Rectangle(0, 0, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight),
+                    new Rectangle(frameActualFondo * (fondoD.Width / totalFramesFondo), 0, fondoD.Width / totalFramesFondo, fondoD.Height),
+                    Color.White * (1 - alphaTransicion));
 
-            Rectangle rectOrigenFondo = new Rectangle(frameActualFondo * fondoAnimado.Width / totalFramesFondo, 0, fondoAnimado.Width / totalFramesFondo, fondoAnimado.Height);
-            _spriteBatch.Draw(fondoAnimado, new Vector2(0, 0), rectOrigenFondo, Color.White);
-            _spriteBatch.DrawString(fuente, $"Score: {score}", new Vector2(10, 10), Color.Orange); // Muestra el score
-            mosquito.Draw(_spriteBatch);
-            sapo.Draw(_spriteBatch);
+                _spriteBatch.Draw(fondoN, new Rectangle(0, 0, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight),
+                    new Rectangle(frameActualFondo * (fondoN.Width / totalFramesFondo), 0, fondoN.Width / totalFramesFondo, fondoN.Height),
+                    Color.White * alphaTransicion);
+            }
+            else
+            {
+                _spriteBatch.Draw(fondoN, new Rectangle(0, 0, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight),
+                    new Rectangle(frameActualFondo * (fondoN.Width / totalFramesFondo), 0, fondoN.Width / totalFramesFondo, fondoN.Height),
+                    Color.White * (1 - alphaTransicion));
+
+                _spriteBatch.Draw(fondoD, new Rectangle(0, 0, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight),
+                    new Rectangle(frameActualFondo * (fondoD.Width / totalFramesFondo), 0, fondoD.Width / totalFramesFondo, fondoD.Height),
+                    Color.White * alphaTransicion);
+            }
+     
+            if (isGameStarted && !isGameOver)
+            {
+                _spriteBatch.DrawString(fuente, $"Puntuacion: {score}", new Vector2(10, 10), Color.LightGoldenrodYellow);
+                _spriteBatch.DrawString(fuente, $"Tiempo: {Math.Max(0, (int)gameTimer)}s", new Vector2(10, 30), Color.LightGoldenrodYellow);
+                _spriteBatch.DrawString(fuente, $"Mosquitos Capturados: {mosquitosCapturados}", new Vector2(580, 10), Color.FloralWhite); // Muestra los mosquitos atrapados
+                
+                mosquito.Draw(_spriteBatch);
+                sapo.Draw(_spriteBatch, _graphics.PreferredBackBufferWidth / 2, _graphics.PreferredBackBufferHeight);
+            }
+            else
+            {
+                string message = isGameOver ? "El tiempo se termino! Presiona Enter para Reiniciar" : "Presiona Enter para Empezar";
+                _spriteBatch.DrawString(fuente, message, new Vector2(200, 200), Color.White);
+                if (isGameOver) DrawScores();
+            }
 
             _spriteBatch.End();
             base.Draw(gameTime);
+        }
+
+        private void SaveScore()
+        {
+            File.AppendAllText("scores.txt", $"{score}\n");
+        }
+
+        private void DrawScores()
+        {
+            string[] scores = File.ReadAllLines("scores.txt");
+            int y = 300;
+            foreach (string score in scores)
+            {
+                _spriteBatch.DrawString(fuente, $"Score: {score}", new Vector2(200, y), Color.Yellow);
+                y += 20;
+            }
+        }
+
+        private void ResetGame()
+        {
+            score = 0;
+            mosquitosCapturados = 0; // Resetea el contador de mosquitos atrapados
+            gameTimer = 60;
+            isGameOver = false;
         }
     }
 }
