@@ -16,7 +16,7 @@ namespace FrogCatch_Alpha01
         private int cantidadMosquitos = 10; // Cantidad total de mosquitos
         private Random random = new Random();
         private int limiteY;
-        private int distanciaMinimaEntreMosquitos = 100; // Nueva variable para ajustar la separación
+        private int distanciaMinimaEntreMosquitos = 200; // Nueva variable para ajustar la separación
 
         // Nuevas propiedades para efectos de color y tiempo
         private Color[] coloresMosquito;
@@ -44,30 +44,32 @@ namespace FrogCatch_Alpha01
         {
             return atrapados[index];
         }
-
         private void SpawnMosquitos(int ancho, int alto)
-        {
-            int ultimoY = -distanciaMinimaEntreMosquitos; // Inicializa para asegurar la primera posición
+{
+        int ultimoY = -distanciaMinimaEntreMosquitos; // Inicializa para asegurar la primera posición
             for (int i = 0; i < cantidadMosquitos; i++)
-            {
-                int nuevoY;
-                do
+                {
+        int nuevoY;
+            do
                 {
                     nuevoY = random.Next(0, limiteY);
-                } while (Math.Abs(nuevoY - ultimoY) < distanciaMinimaEntreMosquitos); // Verifica la distancia mínima
+                } 
+             while (Math.Abs(nuevoY - ultimoY) < distanciaMinimaEntreMosquitos); // Verifica la distancia mínima
 
-                posiciones[i] = new Vector2(0, nuevoY); // Aparecen en la parte izquierda
-                ultimoY = nuevoY;
-                atrapados[i] = false;
-                MosquitosEspeciales(i);  // Asigna un color y efecto a cada mosquito
-            }
-        }
+         int nuevoX = random.Next(0, ancho / 4); 
+
+        posiciones[i] = new Vector2(nuevoX, nuevoY);
+        ultimoY = nuevoY;
+        atrapados[i] = false;
+        MosquitosEspeciales(i);  // Asigna un color y efecto a cada mosquito
+    }
+}
 
         // Método para asignar color y efectos (agregar o quitar tiempo)
         private void MosquitosEspeciales(int index)
         {
-            double probabilidadVerde = 0.10; // 10% de probabilidad
-            double probabilidadRojo = 0.30;  // 30% de probabilidad
+            double probabilidadVerde = 0.20; // 20% de probabilidad
+            double probabilidadRojo = 0.20;  // 20% de probabilidad
 
             double randVal = random.NextDouble();
 
@@ -128,7 +130,7 @@ namespace FrogCatch_Alpha01
                         else if (quitarTiempo[i])
                         {
                             tiempoJuego -= 3; // Disminuye 3 segundos al tiempo del juego
-                            
+                            score -= 15; //resta 5 puntos (Los mosquitos por default dan 10)
                         }
                     }
                 }
