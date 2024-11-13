@@ -3,7 +3,7 @@
 
 ## Descripción
 
-**FrogCatch** es un juego de estilo arcade donde tenés que controlar a un sapo que usa su lengua para atrapar mosquitos. El objetivo es conseguir la mayor puntuación posible en 60 segundos, mientras evitás los mosquitos rojos que te quitan tiempo y aprovechás los verdes que te lo suman. ¡Poné a prueba tus reflejos y hacéte un lugar en el ranking!
+**FrogCatch** es un juego de estilo arcade donde tenés que controlar a un sapo que usa su lengua para atrapar mosquitos. El objetivo es conseguir la mayor puntuación posible en 60 segundos, mientras evitás los mosquitos rojos que te quitan tiempo y puntaje, además de los rojos existen tambien los verdes quienes además de sumarte tiempo, te suman más puntaje. ¡Poné a prueba tus reflejos y hacéte un lugar en el ranking!
 
 ## Instalación
 
@@ -25,10 +25,11 @@ Para jugar a **FrogCatch** en tu PC, seguí estos pasos:
 - Mantené presionada la flecha hacia arriba para cargar la lengua del sapo.
 - Soltá la flecha para disparar la lengua y atrapar los mosquitos.
 - Atrapa todos los mosquitos que puedas en 60 segundos.
-  - Los **mosquitos rojos** te quitan tiempo.
-  - Los **mosquitos verdes** te dan más tiempo.
+  - Los **mosquitos rojos** te quitan tiempo y puntaje.
+  - Los **mosquitos verdes** te dan más tiempo y puntaje.
 
-El objetivo es conseguir la mayor puntuación posible antes de que se termine el tiempo. ¡Atrévanse a superar el récord!
+El objetivo es conseguir la mayor puntuación posible antes de que se termine el tiempo. ¡Atrévanse a superar el récord! 
+Tambien podrian intentar vencer el record del desarrollador ;)
 
 ## Contribución
 
