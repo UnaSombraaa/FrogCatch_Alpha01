@@ -33,8 +33,12 @@ namespace FrogCatch_Alpha01
 
         // Variables para movimiento de texto
         private Vector2 posicionTexto;
-        private float velocidadTexto = 4f;
+        private float velocidadTexto = 3f;
         private bool moverDerecha = true;
+        // Curva del texto del restart
+        private float tiempoOnda = 0f;
+        private float amplitudOnda = 40f; 
+        private float frecuenciaOnda = 1f;
 
 
         private int totalFramesFondo = 4;
@@ -44,7 +48,7 @@ namespace FrogCatch_Alpha01
         private float alphaTransicion = 0.1f;
         private bool esDeDia = true;
         private double temporizadorFondo = 0;
-        private double tiempoCambioFondo = 10;
+        private double tiempoCambioFondo = 30;
 
         private int score = 0;
         private int mosquitosCapturados = 0; // Contador de mosquitos
@@ -123,24 +127,36 @@ namespace FrogCatch_Alpha01
 
             if (GameOver)
             {
+                // Incrementa el tiempo para la onda
+                tiempoOnda += (float)gameTime.ElapsedGameTime.TotalSeconds * frecuenciaOnda;
+
                 // Movimiento de texto de vaivén cuando el juego termina
                 if (moverDerecha)
                 {
                     posicionTexto.X += velocidadTexto;
-                    if (posicionTexto.X >= _graphics.PreferredBackBufferWidth - fuenteGrande.MeasureString("Presiona Enter para Reiniciar").X)
+                    float maxPosX = 600 - fuenteGrande.MeasureString("Presiona Enter para Reiniciar").X;
+                    if (posicionTexto.X >= maxPosX)
                     {
+                        posicionTexto.X = maxPosX; // Ajuste para no pasarse
                         moverDerecha = false;
                     }
                 }
                 else
                 {
                     posicionTexto.X -= velocidadTexto;
-                    if (posicionTexto.X <= 10) // Ajuste para que no se pegue a la izquierda
+                    if (posicionTexto.X <= 10) // Ajuste para no pegarse demasiado a la izquierda
                     {
+                        posicionTexto.X = 10; // Asegura que no se vaya fuera del borde
                         moverDerecha = true;
                     }
-
                 }
+
+                // Aplicar el efecto de onda en la posición Y
+                posicionTexto.Y = 200 + (float)Math.Sin(tiempoOnda) * amplitudOnda;
+
+                // Limitar la posición del texto en X
+                float maxPosXLimitado = 600 - fuenteGrande.MeasureString("Presiona Enter para Reiniciar").X;
+                posicionTexto.X = Math.Clamp(posicionTexto.X, 10, maxPosXLimitado);
 
                 if (Keyboard.GetState().IsKeyDown(Keys.Enter))
                 {
@@ -156,7 +172,7 @@ namespace FrogCatch_Alpha01
             {
                 GameOver = true;
                 SaveScore();
-                return; 
+                return;
             }
 
             mosquito.Update(gameTime, sapo.AreaColisionLengua(), ref gameTimer, ref score);
@@ -225,17 +241,17 @@ namespace FrogCatch_Alpha01
 
                 if (JuegoEmpezado && !GameOver)
                 {
-                    _spriteBatch.DrawString(fuente, $"Puntuacion: {score}", new Vector2(10, 10), Color.Yellow);
-                    _spriteBatch.DrawString(fuente, $"Tiempo: {Math.Max(0, (int)gameTimer)}s", new Vector2(10, 30), Color.Yellow);
-                    _spriteBatch.DrawString(fuente, $"Mosquitos Capturados: {mosquitosCapturados}", new Vector2(580, 10), Color.Yellow);
+                    _spriteBatch.DrawString(fuente, $"Puntuacion: {score}", new Vector2(10, 10), Color.Orange);
+                    _spriteBatch.DrawString(fuente, $"Tiempo: {Math.Max(0, (int)gameTimer)}s", new Vector2(10, 30), Color.Orange);
+                    _spriteBatch.DrawString(fuente, $"Mosquitos Capturados: {mosquitosCapturados}", new Vector2(580, 10), Color.Orange);
 
                     mosquito.Draw(_spriteBatch);
                     sapo.Draw(_spriteBatch, _graphics.PreferredBackBufferWidth / 2, _graphics.PreferredBackBufferHeight);
                 }
                 else
                 {
-                    string message = GameOver ? "Se termino el tiempo! Enter para Reiniciar" : "Presiona Enter para Empezar";
-                    _spriteBatch.DrawString(fuenteGrande, message, posicionTexto, Color.Yellow);
+                    string message = GameOver ? "Se termino el tiempo! Enter para Reiniciar" : "null";
+                    _spriteBatch.DrawString(fuenteGrande, message, posicionTexto, Color.Orange);
                     if (GameOver) DrawScores();
                 }
             }
@@ -255,7 +271,8 @@ namespace FrogCatch_Alpha01
             int y = 0;
             foreach (string score in scores)
             {
-                _spriteBatch.DrawString(fuente, $"Tu puntuacion: {score}", new Vector2(0, y), Color.Yellow);
+                _spriteBatch.DrawString(fuente, $"Puntuacion Dev: 4500", new Vector2(600, 0), Color.Orange);
+                _spriteBatch.DrawString(fuente, $"Tu puntuacion: {score}", new Vector2(0, y), Color.Orange);
                 y += 20;
             }
         }
