@@ -40,10 +40,6 @@ El objetivo es conseguir la mayor puntuación posible antes de que se termine el
 4. Hacé push de los cambios: `git push origin nueva-caracteristica`
 5. Creá un Pull Request para revisar tus cambios.
 
-## Licencia
-
-Este proyecto está bajo la Licencia MIT. Podés ver más detalles en el archivo [LICENSE](LICENSE).
-
 ## Autores
 
 - Lautaro Jerez
