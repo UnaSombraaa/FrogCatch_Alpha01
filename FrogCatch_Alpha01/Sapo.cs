@@ -1,17 +1,17 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Media;
 using System.Threading;
 
 namespace FrogCatch_Alpha01
 {
     public class Sapo
-    {
-   
-
-        
+    {   
         private Texture2D[] estadosSapo;
         private Texture2D[] lenguas;
+        private SoundEffect Lenguetazo;
 
         private int frameActualSapo;
         private float alturaLengua;
@@ -28,10 +28,12 @@ namespace FrogCatch_Alpha01
         private float alturaMaxima;
         private Vector2 posicionColision;
 
-        public Sapo(Texture2D sapoBase, Texture2D sapoDisparoBajo, Texture2D sapoDisparoMedio, Texture2D sapoDisparoAlto, Texture2D[] lenguas)
+        public Sapo(Texture2D sapoBase, Texture2D sapoDisparoBajo, Texture2D sapoDisparoMedio, Texture2D sapoDisparoAlto, Texture2D[] lenguas, SoundEffect Lenguetazo)
         {
             estadosSapo = new Texture2D[] { sapoBase, sapoDisparoBajo, sapoDisparoMedio, sapoDisparoAlto};
+
             this.lenguas = lenguas;
+            this.Lenguetazo = Lenguetazo;
             alturaLengua = 0;
             disparando = false;
             cargando = false;
@@ -65,6 +67,8 @@ namespace FrogCatch_Alpha01
                     cargando = false;
                     subiendo = true;
                     tiempoPresionado = 0;
+
+                    Lenguetazo.Play();
                 }
             }
 
@@ -140,11 +144,11 @@ namespace FrogCatch_Alpha01
             spriteBatch.Draw(lenguas[lenguaFrame], new Rectangle((int)posicionLengua.X, (int)(posicionLengua.Y - lenguaHeight), lenguaWidth, lenguaHeight), Color.White);
             spriteBatch.Draw(estadosSapo[frameActualSapo], new Rectangle(250, 230, 250, 250), Color.White);
 
-
-            Rectangle areaColision = AreaColisionLengua();
-            Texture2D blanco = new Texture2D(spriteBatch.GraphicsDevice, 1, 1);
-            blanco.SetData(new[] { Color.Red });
-            spriteBatch.Draw(blanco, areaColision, Color.Blue);
+            //Testeo de Hitbox
+            //Rectangle areaColision = AreaColisionLengua();
+            //Texture2D blanco = new Texture2D(spriteBatch.GraphicsDevice, 1, 1);
+            //blanco.SetData(new[] { Color.Red });
+            //spriteBatch.Draw(blanco, areaColision, Color.Blue);
         }
     }
 }

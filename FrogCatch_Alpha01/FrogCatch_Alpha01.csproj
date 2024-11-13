@@ -9,7 +9,7 @@
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationManifest>app.manifest</ApplicationManifest>
-    <ApplicationIcon>Icon.ico</ApplicationIcon>
+    <ApplicationIcon>Content\Icono\Icono.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="Content\Sprites\**" />
@@ -26,5 +26,8 @@
   </Target>
   <ItemGroup>
     <_GlobalJsonStartingDir Remove="Content\Sprites\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Content\Icono\Icono.ico" />
   </ItemGroup>
 </Project>
