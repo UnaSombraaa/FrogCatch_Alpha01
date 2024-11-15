@@ -11,7 +11,7 @@ Para jugar a **FrogCatch** en tu PC, seguí estos pasos:
 
 1. Cloná el repositorio:
    ```bash
-   git clone https://github.com/UnaSombraaa/FrogCatch.git
+   git clone https://github.com/UnaSombraaa/FrogCatch_Alpha01.git
    ```
 
 2. Asegurate de tener **Monogame** instalado. Podés descargarlo desde [acá](https://www.monogame.net/).
