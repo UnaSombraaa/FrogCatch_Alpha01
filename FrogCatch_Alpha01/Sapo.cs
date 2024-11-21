@@ -8,7 +8,8 @@ using System.Threading;
 namespace FrogCatch_Alpha01
 {
     public class Sapo
-    {   
+    {
+ 
         private Texture2D[] estadosSapo;
         private Texture2D[] lenguas;
         private SoundEffect Lenguetazo;
@@ -22,6 +23,8 @@ namespace FrogCatch_Alpha01
         private bool disparando;
         private bool cargando;
         private bool subiendo;
+
+        
         
         private float tiempoPresionado;
         private Vector2 posicionLengua;
@@ -123,7 +126,7 @@ namespace FrogCatch_Alpha01
             for (int i = 0; i < mosquito.Posiciones.Length; i++)
             {
                 if (mosquito.IsMosquitoAtrapado(i)) continue; // Ignora si ya está atrapado
-
+                    
                 Rectangle mosquitoRect = new Rectangle((int)mosquito.Posiciones[i].X, (int)mosquito.Posiciones[i].Y, 50, 50);
                 if (mosquitoRect.Intersects(AreaColisionLengua()))
                 {

@@ -11,6 +11,7 @@ using Microsoft.Xna.Framework.Input;
         private Texture2D fondoMenu;
         private Texture2D botonPlay;
         private Texture2D titulo;
+        private Texture2D botonTuto;
         private Rectangle botonPlayRect;
         private SpriteBatch spriteBatch;
         private float alpha; // Para la opacidad de la transición
@@ -24,6 +25,8 @@ using Microsoft.Xna.Framework.Input;
             botonPlay = content.Load<Texture2D>("Menu/BOTONPLAY");
             titulo = content.Load<Texture2D>("Menu/FrogCATCHHHHH");
 
+
+
             // Definir la posición del botón
             botonPlayRect = new Rectangle(300, 200, 190, 200);
 
@@ -33,6 +36,7 @@ using Microsoft.Xna.Framework.Input;
 
         public bool Update(GameTime gameTime)
         {
+  
             MouseState mouseState = Mouse.GetState();
 
             // Comienza la transición si se presiona el botón

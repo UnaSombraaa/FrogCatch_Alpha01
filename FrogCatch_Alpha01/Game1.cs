@@ -20,6 +20,9 @@ namespace FrogCatch_Alpha01
         private Song cancion;
         private SoundEffect Lenguetazo;
 
+        private Texture2D botonTuto;
+        private Texture2D pixel;
+
         private Texture2D Marco;
 
         private Mosquito mosquito;
@@ -49,6 +52,16 @@ namespace FrogCatch_Alpha01
         private bool esDeDia = true;
         private double temporizadorFondo = 0;
         private double tiempoCambioFondo = 30;
+       
+        private int fotogramasBoton = 4; // Cuántos fotogramas tiene el botón (puedes ajustarlo)
+        private int frameActualBoton = 0;
+        private double tiempoTranscurridoBoton = 0;
+        private double tiempoPorFrameBoton = 200; // Tiempo entre cada fotograma del botón
+        private bool botonVisible = true;  // Visibilidad del botón (por defecto visible)
+        private int contadorTeclasArriba = 0; // Contador de teclas hacia arriba
+
+
+        
 
         private int score = 0;
         private int mosquitosCapturados = 0; // Contador de mosquitos
@@ -76,12 +89,14 @@ namespace FrogCatch_Alpha01
             MediaPlayer.IsRepeating = true;
             MediaPlayer.Volume = 0.4f;
             MediaPlayer.Play(cancion);
-
             
             Lenguetazo = Content.Load<SoundEffect>("Musica_Efectos/lenguetazo");
             
             // Cargar el menú
             _menu = new Menu(GraphicsDevice, Content);
+
+            // Cargar boton
+            botonTuto = Content.Load<Texture2D>("Menu/botonTuto");
 
             // Cargar recursos del juego
             fuente = Content.Load<SpriteFont>("Fuente/Fuente");
@@ -110,6 +125,8 @@ namespace FrogCatch_Alpha01
             sapo = new Sapo(sapoBase, sapoDisparoBajo, sapoDisparoMedio, sapoDisparoAlto, lenguas, Lenguetazo);
 
             posicionTexto = new Vector2(100, 200);
+            pixel = new Texture2D(GraphicsDevice, 1, 1);
+            pixel.SetData(new Color[] { Color.Black });
 
         }
 
@@ -156,7 +173,7 @@ namespace FrogCatch_Alpha01
 
                 // Limitar la posición del texto en X
                 float maxPosXLimitado = 600 - fuenteGrande.MeasureString("Presiona Enter para Reiniciar").X;
-                posicionTexto.X = Math.Clamp(posicionTexto.X, 10, maxPosXLimitado);
+                posicionTexto.X = Math.Clamp(posicionTexto.X, 10, maxPosXLimitado); 
 
                 if (Keyboard.GetState().IsKeyDown(Keys.Enter))
                 {
@@ -194,6 +211,27 @@ namespace FrogCatch_Alpha01
                 }
             }
 
+            // Lógica de actualización para el botón
+            tiempoTranscurridoBoton += gameTime.ElapsedGameTime.TotalMilliseconds;
+            if (tiempoTranscurridoBoton >= tiempoPorFrameBoton)
+            {
+                // Cambia el fotograma actual
+                frameActualBoton = (frameActualBoton + 1) % fotogramasBoton;
+                tiempoTranscurridoBoton = 0;
+            }
+
+
+            // Lógica para el botón y el contador de teclas hacia arriba
+            if (keyboardState.IsKeyDown(Keys.Up))
+            {
+                contadorTeclasArriba++;  // Aumenta el contador al presionar la tecla hacia arriba
+            }
+
+            if (contadorTeclasArriba >= 3)
+            {
+                botonVisible = false;  // Oculta el botón cuando el contador llega a 3
+            }
+
             for (int i = 0; i < mosquito.Posiciones.Length; i++)
             {
                 if (mosquito.IsMosquitoAtrapado(i))
@@ -205,12 +243,11 @@ namespace FrogCatch_Alpha01
                 }
             }
         }
-
-
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
             _spriteBatch.Begin();
+         
 
             if (_menuActivo)
             {
@@ -218,6 +255,7 @@ namespace FrogCatch_Alpha01
             }
             else
             {
+                // Primero dibujamos los fondos
                 if (esDeDia)
                 {
                     _spriteBatch.Draw(fondoD, new Rectangle(0, 0, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight),
@@ -239,6 +277,34 @@ namespace FrogCatch_Alpha01
                         Color.White * alphaTransicion);
                 }
 
+                // Luego dibujamos el botón si es visible
+                if (botonVisible)
+                {
+                    // Calcula el rectángulo que representa el fotograma actual en la sprite sheet
+                    int frameWidth = 64; // Ancho del fotograma (64px)
+                    int frameHeight = 64; // Alto del fotograma (64px)
+
+                    // Establece el rectángulo de la sprite sheet que se debe dibujar
+                    Rectangle sourceRectangle = new Rectangle(frameActualBoton * frameWidth, 0, frameWidth, frameHeight);
+
+                    // Establece la posición en pantalla donde se dibujará el botón
+                    Rectangle destinationRectangle = new Rectangle(500, 250, 200, 200);
+                   
+                    Color colortransparente = new Color(0, 0, 0, 128);
+                
+                    Rectangle rectanguloNegro = new Rectangle(490, 150, 310, 250);
+                    _spriteBatch.Draw(pixel, rectanguloNegro, colortransparente);
+                    _spriteBatch.Draw(botonTuto, destinationRectangle, sourceRectangle, Color.Yellow);
+                    _spriteBatch.DrawString(fuenteGrande, "TUTORIAL", new Vector2(500, 150), Color.Yellow);
+                    _spriteBatch.DrawString(fuente, "Presiona la flecha hacia arriba", new Vector2(500, 200), Color.Yellow);
+                    _spriteBatch.DrawString(fuente, "Para cargar la lengua", new Vector2(500, 220), Color.Yellow);
+                    _spriteBatch.DrawString(fuente, "Y Sueltala para disparar", new Vector2(500, 240), Color.Yellow);
+                    _spriteBatch.DrawString(fuente, "Atento a las mejillas del sapo", new Vector2(500, 260), Color.Yellow);
+                    _spriteBatch.DrawString(fuente, "Indican que tan lejos puedes llegar", new Vector2(500, 280), Color.Yellow);
+
+                }
+
+                // Después, dibujamos la información del juego (puntuación, tiempo, etc.)
                 if (JuegoEmpezado && !GameOver)
                 {
                     _spriteBatch.DrawString(fuente, $"Puntuacion: {score}", new Vector2(10, 10), Color.Orange);
@@ -259,6 +325,7 @@ namespace FrogCatch_Alpha01
             _spriteBatch.End();
             base.Draw(gameTime);
         }
+
 
         private void SaveScore()
         {
