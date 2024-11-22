@@ -59,7 +59,7 @@ namespace FrogCatch_Alpha01
                 if (cargando && tiempoPresionado > 0)
                 {
                     if (tiempoPresionado >= 1000)
-                        alturaMaxima = 450;
+                        alturaMaxima = 460;
                     else if (tiempoPresionado >= 500)
                         alturaMaxima = 400;
                     else if (tiempoPresionado >= 200)
@@ -116,7 +116,7 @@ namespace FrogCatch_Alpha01
         public Rectangle AreaColisionLengua()
         {
             int lenguaWidth = 30;
-            int lenguaHeight = (int)(alturaLengua * 0.86f);
+            int lenguaHeight = (int)(alturaLengua * 0.9f);
             return new Rectangle((int)posicionColision.X, (int)(posicionColision.Y - lenguaHeight), lenguaWidth, lenguaHeight);
         }
 
@@ -139,9 +139,9 @@ namespace FrogCatch_Alpha01
 
         public void Draw(SpriteBatch spriteBatch, int screenWidth, int screenHeight)
         {
-            int lenguaFrame = alturaLengua >= 450 ? 0 : alturaLengua >= 300 ? 1 : alturaLengua >= 150 ? 2 : 3;
+            int lenguaFrame = alturaLengua >= 470 ? 0 : alturaLengua >= 300 ? 1 : alturaLengua >= 150 ? 2 : 3;
             int lenguaWidth = 200;
-            int lenguaHeight = (int)(alturaLengua * 1f);
+            int lenguaHeight = (int)(alturaLengua * 1.1f);
             
             
             spriteBatch.Draw(lenguas[lenguaFrame], new Rectangle((int)posicionLengua.X, (int)(posicionLengua.Y - lenguaHeight), lenguaWidth, lenguaHeight), Color.White);
