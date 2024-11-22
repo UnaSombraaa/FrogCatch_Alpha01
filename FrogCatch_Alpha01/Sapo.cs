@@ -116,7 +116,7 @@ namespace FrogCatch_Alpha01
         public Rectangle AreaColisionLengua()
         {
             int lenguaWidth = 30;
-            int lenguaHeight = (int)(alturaLengua * 0.8f);
+            int lenguaHeight = (int)(alturaLengua * 0.86f);
             return new Rectangle((int)posicionColision.X, (int)(posicionColision.Y - lenguaHeight), lenguaWidth, lenguaHeight);
         }
 

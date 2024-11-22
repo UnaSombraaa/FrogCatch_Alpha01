@@ -15,7 +15,9 @@ using Microsoft.Xna.Framework.Input;
         private Rectangle botonPlayRect;
         private SpriteBatch spriteBatch;
         private float alpha; // Para la opacidad de la transición
-        private bool iniciandoTransicion; // Para indicar si la transición está ocurriendo
+        private bool iniciandoTransicion;
+        private KeyboardState estadoTecla;
+        // Para indicar si la transición está ocurriendo
 
         public Menu(GraphicsDevice graphicsDevice, ContentManager content)
         {
@@ -36,26 +38,28 @@ using Microsoft.Xna.Framework.Input;
 
         public bool Update(GameTime gameTime)
         {
-  
-            MouseState mouseState = Mouse.GetState();
+            KeyboardState keyboardState = Keyboard.GetState();
 
-            // Comienza la transición si se presiona el botón
-            if (mouseState.LeftButton == ButtonState.Pressed && botonPlayRect.Contains(mouseState.Position))
+            // Comienza la transición si se presiona la tecla "Space"
+            if (keyboardState.IsKeyDown(Keys.Space) && !estadoTecla.IsKeyDown(Keys.Space))
             {
                 iniciandoTransicion = true;
             }
 
-            //Si alpha disminuye da el efecto de desvanecimiento
+            // Si alpha disminuye da el efecto de desvanecimiento
             if (iniciandoTransicion)
             {
-                alpha -= 0.05f; 
+                alpha -= 0.05f;
 
                 if (alpha <= 0)
                 {
                     alpha = 0;
-                    return true; //Termina la transicion, inicia el juego
+                    return true; // Termina la transición, inicia el juego
                 }
             }
+
+            // Guardamos el estado anterior del teclado para detectar el primer pulso
+            estadoTecla = keyboardState;
 
             return false;
         }
