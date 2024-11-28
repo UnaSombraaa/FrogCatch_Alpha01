@@ -18,7 +18,11 @@ Para jugar a **FrogCatch** en tu PC, seguí estos pasos:
 
 3. Abrí el proyecto en Visual Studio o en el IDE que prefieras.
 
-4. Compilá y ejecutá el juego. Si todo está bien configurado, ya vas a poder empezar a jugar.
+4. Asegurate de descargar la fuente "VP Pixel". Podés decargarla desde [acá](https://www.dafont.com/vp-pixel.font).
+
+5. Contruye todos los archivos, dirigiendote a la carpeta Content, entrando en el archivo, Content.mgcb y dandole al boton, build para construir todos los recursos del juego
+
+6. Compilá y ejecutá el juego. Si todo está bien configurado, ya vas a poder empezar a jugar.
 
 ## Cómo Jugar
 
